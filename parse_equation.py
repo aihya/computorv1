@@ -1,4 +1,4 @@
-class Parse:
+class Parser:
     def __init__(self, equation):
         self.equation = equation
         self.terms = list()
@@ -20,29 +20,54 @@ class Parse:
 
         return res
 
+    def convert_num(self, num):
+        count = num.count('.')
+        return int(num) if count == 0 else float(num)
+
     def parse_side(self, string):
         degrees = dict()
         chars = list(string.replace(' ', ''))
 
         # Assemble numbers
         array = self.assemble_numbers(chars)
+        length = len(array)
 
         # Collect terms
         i = 0
-        while array[i]:
+        while i < length:
             if array[i] == 'X':
-                try:
+                if i + 1 < length:
                     if array[i + 1] == '^':
-                        degree = int(array[i + 2])
-                except:
-                   pass 
-        
+                        degree = self.convert_num(array[i + 2])
+                    else:
+                        degree = 1
+                if i - 1 >= 0:
+                    if array[i - 1] == '*':
+                        factor = self.convert_num(array[i - 2])
+                    else:
+                        factor = 1
+                    if i - 3 >= 0:
+                        if array[i - 3] == '-':
+                            factor *= -1
+                term = Term(factor=factor, degree=degree)
+                if degrees.get(degree) == None:
+                    degrees[degree] = list()
+                degrees[degree].append(term)
+            i += 1
+        return degrees
 
     def parse(self):
         left, right = self.equation.split('=')
+        return self.parse_side(left)
 
 
 class Term:
-    def __init__(self, factor=0, degree=0):
+    def __init__(self, factor=None, degree=None):
         self.factor = factor
         self.degree = degree
+
+    def get_factor(self):
+        return self.factor
+
+    def get_degree(self):
+        return self.degree

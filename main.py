@@ -1,10 +1,20 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    main.py                                            :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2021/01/31 17:55:42 by aihya             #+#    #+#              #
+#    Updated: 2021/01/31 18:49:04 by aihya            ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 import sys
-from parse_equation import Parser
+from parse_equation import LexicalParser
 
 if len(sys.argv) == 2:
     equation = sys.argv[1]
 
-parsed_result = Parser(equation).parse()
-for k in parsed_result.keys():
-    for term in parsed_result[k]:
-        print("{} * X^{}".format(term.get_factor(), term.get_degree()))
+parsed_result = LexicalParser(equation).parse()
+print(parsed_result)

@@ -1,65 +1,103 @@
-class Parser:
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    parse_equation.py                                  :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2021/01/31 17:55:45 by aihya             #+#    #+#              #
+#    Updated: 2021/01/31 19:25:01 by aihya            ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+class LexicalParser:
     def __init__(self, equation):
         self.equation = equation
         self.terms = list()
+        self.error = None
+        self.last_pos = 0
 
-    def assemble_numbers(self, chars):
-        res = list()
-        number = ''
-        for c in chars:
-            if c in '.0123456789':
-                number += c
-                continue
-            else:
-                if len(number) != 0:
-                    res.append(number)
-                    number = ''
-                res.append(c)
-        if len(number) != 0:
-            res.append(number)
+    def parsing_error_msg(self, pos):
+        return "Parsing error at position: {}".format(pos)
 
-        return res
+    def get_factor(self, start):
+        sign = 1
+        factor = 0
+        _factor = ""
+        dot_count = 0
+        l = len(self.equation)
+        i = start
 
-    def convert_num(self, num):
-        count = num.count('.')
-        return int(num) if count == 0 else float(num)
+        # if self.equation[i] == '-':
+        #     sign = -1
+        #     i += 1
+        #     if i < l and self.equation[i] in ".0123456789":
+        #         while i < l and self.equation[i] in ".0123456789":
+        #             if self.equation[i] == '.':
+        #                 dot_count += 1
+        #             if dot_count > 1:
+        #                 self.error = self.parsing_error_msg(i)
+        #                 return None
+        #             _factor += self.equation[i]
+        #             i += 1
+        #     else:
+        #         self.error = self.parsing_error_msg(i)
+        #         return None
 
-    def parse_side(self, string):
-        degrees = dict()
-        chars = list(string.replace(' ', ''))
-
-        # Assemble numbers
-        array = self.assemble_numbers(chars)
-        length = len(array)
-
-        # Collect terms
-        i = 0
-        while i < length:
-            if array[i] == 'X':
-                if i + 1 < length:
-                    if array[i + 1] == '^':
-                        degree = self.convert_num(array[i + 2])
-                    else:
-                        degree = 1
-                if i - 1 >= 0:
-                    if array[i - 1] == '*':
-                        factor = self.convert_num(array[i - 2])
-                    else:
-                        factor = 1
-                    if i - 3 >= 0:
-                        if array[i - 3] == '-':
-                            factor *= -1
-                term = Term(factor=factor, degree=degree)
-                if degrees.get(degree) == None:
-                    degrees[degree] = list()
-                degrees[degree].append(term)
+        if self.equation[i] == '-':
+            sign = -1
             i += 1
-        return degrees
+        while i < l and self.equation[i] in ".0123456789":
+            if self.equation[i] == '.':
+                dot_count += 1
+            if dot_count > 1:
+                self.error = self.parsing_error_msg(i)
+                return None
+            _factor += self.equation[i]
+            i += 1
+        print(">", _factor)
+        if sign == 1 and len(_factor) == 0:
+            _factor = '0'
+        elif dot_count > 1 and sign == -1:
+            self.error = self.parsing_error_msg(i)
+            return None
+
+        self.last_pos = i
+        if dot_count == 0:
+            factor = sign * int(_factor)
+        else:
+            factor = sign * float(_factor)
+        return factor
+                
+
+    def get_degree(self):
+        pass
+
+    def get_term(self, start):
+        """
+            Term format:
+                -5 * X^2
+                -5 * X
+                X
+        """
+        # length = len(self.equation)
+        # i = start
+        # while i < length and self.equation[i] != '=':
+        #     if self.equation[i] == '-':
+        #         pass
+
+        factor = self.get_factor(0)
+        if factor == None:
+            return None
+        print(factor)
+        
+        # degree = self.get_degree()
 
     def parse(self):
-        left, right = self.equation.split('=')
-        return self.parse_side(left)
-
+        end = self.get_term(0)
+        # while self.error == None:
+        #     end = self.get_term(end)
+        
 
 class Term:
     def __init__(self, factor=None, degree=None):

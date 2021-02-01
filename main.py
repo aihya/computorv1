@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/01/31 17:55:42 by aihya             #+#    #+#              #
-#    Updated: 2021/01/31 18:49:04 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/01 18:53:29 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,4 +17,5 @@ if len(sys.argv) == 2:
     equation = sys.argv[1]
 
 parsed_result = LexicalParser(equation).parse()
-print(parsed_result)
+
+# "X^0 +5 * X^1= 5*X^2" ERROR

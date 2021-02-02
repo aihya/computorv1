@@ -1,12 +1,12 @@
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
-#    parse_equation.py                                  :+:      :+:    :+:    #
+#    parser.py                                          :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/01/31 17:55:45 by aihya             #+#    #+#              #
-#    Updated: 2021/02/02 16:21:30 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/02 18:17:14 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -48,15 +48,15 @@ class LexicalParser:
             self.error_msg = self.parsing_error_msg(self.i - len(_factor))
             return None
 
-        if _factor.count('.') == 0:
-            factor = sign * int(_factor)
-        else:
-            try:
+        try:
+            if _factor.count('.') == 0:
+                factor = sign * int(_factor)
+            else:
                 factor = sign * float(_factor)
-            except:
-                self.error = True
-                self.error_msg = self.parsing_error_msg(self.i - len(_factor))
-                return None
+        except:
+            self.error = True
+            self.error_msg = self.parsing_error_msg(self.i - len(_factor))
+            return None
         return side * factor
 
     def get_degree(self):
@@ -102,12 +102,9 @@ class LexicalParser:
                 -5 * X  or  -5 * X^2
         """
         factor = self.get_factor(side)
-        print("factor:", factor, self.error_msg)
         if self.error:
             return
         degree = self.get_degree()
-        print("degree:", degree, self.error_msg)
-
         self.terms.append(Term(factor=factor, degree=degree))
 
     def parse(self):

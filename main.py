@@ -6,16 +6,22 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/01/31 17:55:42 by aihya             #+#    #+#              #
-#    Updated: 2021/02/02 14:31:18 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/02 18:15:41 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 import sys
-from parse_equation import LexicalParser
+from parser import LexicalParser, Term
+from solver import Solver
 
 if len(sys.argv) == 2:
     equation = sys.argv[1]
 
-parsed_result = LexicalParser(equation).parse()
+terms = LexicalParser(equation).parse()
 
-# "X^0 +5 * X^1= 5*X^2" ERROR
+s = Solver(terms)
+s.reduced_form()
+s.polynomial_degree()
+
+# "- 8*X^1 - 5 * X^0" Error: Not solved
+# "X^0 +5 * X^1= 5*X^2" Error: Solved

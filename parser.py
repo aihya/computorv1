@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/01/31 17:55:45 by aihya             #+#    #+#              #
-#    Updated: 2021/02/02 18:17:14 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/03 17:04:28 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -57,7 +57,7 @@ class LexicalParser:
             self.error = True
             self.error_msg = self.parsing_error_msg(self.i - len(_factor))
             return None
-        return side * factor
+        return side * sign, side * factor
 
     def get_degree(self):
         _degree = ""
@@ -93,19 +93,21 @@ class LexicalParser:
             degree = int(_degree)
         return degree
 
-    
-
     def get_term(self, side):
         """
             Term format:
                 2.5 * X or  2.5 * X^2 or
                 -5 * X  or  -5 * X^2
         """
-        factor = self.get_factor(side)
+        sign, factor = self.get_factor(side)
         if self.error:
+            print(self.error_msg)
             return
         degree = self.get_degree()
-        self.terms.append(Term(factor=factor, degree=degree))
+        if self.error:
+            print(self.error_msg)
+            return
+        self.terms.append(Term(sign, factor, degree))
 
     def parse(self):
         while self.i < self.len:
@@ -126,12 +128,16 @@ class LexicalParser:
         return self.terms
 
 class Term:
-    def __init__(self, factor=None, degree=None):
+    def __init__(self, sign=None, factor=None, degree=None):
         self.factor = factor
         self.degree = degree
+        self.sign = sign
 
     def get_factor(self):
         return self.factor
 
     def get_degree(self):
         return self.degree
+    
+    def set_factor(self, num):
+        self.factor += num

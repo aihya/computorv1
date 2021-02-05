@@ -6,11 +6,9 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/01/31 17:55:45 by aihya             #+#    #+#              #
-#    Updated: 2021/02/03 17:04:28 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/05 17:44:13 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
-
-import time
 
 class LexicalParser:
     def __init__(self, equation):
@@ -20,6 +18,9 @@ class LexicalParser:
         self.error_msg = None
         self.error = None
         self.i = 0
+    
+    def inv_exp(self, msg):
+        print("Invalid expression: {}".format(msg))
 
     def parsing_error_msg(self, pos):
         return "Parsing error at position: {}".format(pos)
@@ -28,14 +29,14 @@ class LexicalParser:
         while self.i < self.len and self.eq[self.i] == ' ':
             self.i += 1
 
-    def get_factor(self, side):
+    def read_factor(self, side):
         factor = 0
         _factor = ""
         sign = 1
-        if self.eq[self.i] == '-':
+        if self.i < self.len and self.eq[self.i] == '-':
             sign = -1
             self.i += 1
-        elif self.eq[self.i] == '+':
+        elif self.i < self.len and self.eq[self.i] == '+':
             self.i += 1
         self.escape_spaces()
 
@@ -46,7 +47,7 @@ class LexicalParser:
         if _factor.count('.') > 1 or len(_factor) == 0:
             self.error = True
             self.error_msg = self.parsing_error_msg(self.i - len(_factor))
-            return None
+            return None, None
 
         try:
             if _factor.count('.') == 0:
@@ -56,10 +57,10 @@ class LexicalParser:
         except:
             self.error = True
             self.error_msg = self.parsing_error_msg(self.i - len(_factor))
-            return None
+            return None, None
         return side * sign, side * factor
 
-    def get_degree(self):
+    def read_degree(self):
         _degree = ""
         degree = 0
         while self.i < self.len and self.eq[self.i] == ' ':
@@ -93,38 +94,65 @@ class LexicalParser:
             degree = int(_degree)
         return degree
 
-    def get_term(self, side):
+    def read_term(self, side):
         """
             Term format:
                 2.5 * X or  2.5 * X^2 or
                 -5 * X  or  -5 * X^2
         """
-        sign, factor = self.get_factor(side)
+        sign, factor = self.read_factor(side)
         if self.error:
             print(self.error_msg)
-            return
-        degree = self.get_degree()
+            return None
+        degree = self.read_degree()
         if self.error:
             print(self.error_msg)
-            return
+            return None
         self.terms.append(Term(sign, factor, degree))
+        return True
 
     def parse(self):
+        # Read terms from left side of equation.
         while self.i < self.len:
             self.escape_spaces()
-            self.get_term(1)
-            if self.error:
+
+            # "ret" if either None or True.
+            # None if an error occured while reading terms.
+            # True if a term is read successfully.
+            ret = self.read_term(1)
+            if ret == None:
                 return None
+
             self.escape_spaces()
-            if self.eq[self.i] == '=':
-                self.i += 1
+            if self.i < self.len and self.eq[self.i] == '=':
                 break
+        
+        # Count consecutive equal signs in equation.
+        eqs_count = 0
+        while self.i < self.len and self.eq[self.i] == '=':
+            eqs_count += 1
+            self.i += 1
+        if eqs_count == 0:
+            self.inv_exp("No equal sign found.")
+            return None
+        elif eqs_count > 1:
+            print(self.parsing_error_msg(self.i))
+            return None
+
+        # Read terms from right side of equation.
+        ret = None
         while self.i < self.len:
             self.escape_spaces()
-            self.get_term(-1)
-            if self.error:
-                return None
+            ret = self.read_term(-1)
+            if ret == None:
+                break
             self.escape_spaces()
+
+        if ret == None:
+            # This condition is activated when there is nothing 
+            # on right side if the equation.
+            self.inv_exp("No terms found on right side of equation")
+            return None
         return self.terms
 
 class Term:

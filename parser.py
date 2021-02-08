@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/01/31 17:55:45 by aihya             #+#    #+#              #
-#    Updated: 2021/02/05 17:44:13 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/08 16:34:48 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -169,3 +169,4 @@ class Term:
     
     def set_factor(self, num):
         self.factor += num
+        self.sign = 1 if self.factor >= 0 else -1

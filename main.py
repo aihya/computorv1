@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/01/31 17:55:42 by aihya             #+#    #+#              #
-#    Updated: 2021/02/05 18:27:00 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/08 16:09:08 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,8 @@ if terms != None:
     s.polynomial_degree()
     s.solutions()
 
-# "1*X^1=2*X^1" Error: Not solved
+# "1*X^1=2*X^1" Error: Solved
 # "- 8*X^1 - 5 * X^0" Error: Solved
 # "X^0 +5 * X^1= 5*X^2" Error: Solved
+# ""
 

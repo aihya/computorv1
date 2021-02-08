@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/02 16:56:21 by aihya             #+#    #+#              #
-#    Updated: 2021/02/05 18:23:30 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/08 16:30:35 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -83,16 +83,25 @@ class Solver:
         print(_delta)
 
         return a, b, _delta
+    
+    def solve_2(self):
+        pass
+
+    def solve_1(self):
+        pass
+
+    def solve_0(self):
+        if 0 in self.degrees and self.degrees[0].factor != 0:
+            print("¯\_(ツ)_/¯")
+        else:
+            print("Solution: All real numbers are solutions for this equation")
 
     def solutions(self):
         if self.degree == 0:
-            if 0 in self.degrees and self.degrees[0].factor != 0:
-                print("¯\_(ツ)_/¯")
-            else:
-                print("Solution: 0")
-        if self.degree == 1:
+            self.solve_0()
+        elif self.degree == 1:
             pass
-        if self.degree == 2:
+        elif self.degree == 2:
             a, b, _delta = self.delta()
             if _delta == 0:
                 x1 = -b / 2*a
@@ -104,4 +113,5 @@ class Solver:
                 print("{:.6f}\n{:.6f}".format(x1, x2))
             else:
                 print("Discriminant is strictly negative, solutions are complexe.")
-        
+        else:
+            print("I can't solve polynomials strictly greater then 2.")

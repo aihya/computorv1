@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/02 16:56:21 by aihya             #+#    #+#              #
-#    Updated: 2021/02/08 17:12:41 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/08 17:52:52 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,10 @@ class Solver:
         self.degree = 0
         self.reduce_eq()
         self.set_degree()
-    
+
+    def debug(self, msg):
+       print("DEBUG:", msg)
+
     def sqrt(self, num):
         thresh = 0.0000001
 
@@ -40,6 +43,10 @@ class Solver:
                 self.degrees[term.degree].set_factor(term.factor)
             else:
                 self.degrees[term.degree] = term
+        
+        #for d in self.degrees:
+        #    if d.factor == 0:
+                
     
     def set_degree(self):
         degrees = sorted(self.degrees)
@@ -80,20 +87,18 @@ class Solver:
         a = self.get_factor(2)
 
         _delta = b*b - 4*a*c
-
+        self.debug("delta: {}".format(_delta))
         return a, b, _delta
-
-    def solve_2(self):
-        pass
-
-    def solve_1(self):
-        pass
 
     def solve_0(self):
         if 0 in self.degrees and self.degrees[0].factor != 0:
             print("¯\_(ツ)_/¯")
         else:
             print("Solution: All real numbers are solutions for this equation")
+
+    def solve_2(self):
+        a, b, delta = self.delta()
+        
 
     def solutions(self):
         if self.degree == 0:

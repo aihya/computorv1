@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/01/31 17:55:42 by aihya             #+#    #+#              #
-#    Updated: 2021/02/08 16:09:08 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/08 18:05:21 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,5 +27,7 @@ if terms != None:
 # "1*X^1=2*X^1" Error: Solved
 # "- 8*X^1 - 5 * X^0" Error: Solved
 # "X^0 +5 * X^1= 5*X^2" Error: Solved
-# ""
+# "5 * X^0 + 4 * X^1 = 0 * X^2" Error: Not solved
 
+
+# PGCD

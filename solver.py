@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/02 16:56:21 by aihya             #+#    #+#              #
-#    Updated: 2021/02/08 16:30:35 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/08 17:12:41 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -75,15 +75,14 @@ class Solver:
 
     def delta(self):
         # Delta = b^2 - 4*a*c
-        a = self.get_factor(0)
+        c = self.get_factor(0)
         b = self.get_factor(1)
-        c = self.get_factor(2)
+        a = self.get_factor(2)
 
         _delta = b*b - 4*a*c
-        print(_delta)
 
         return a, b, _delta
-    
+
     def solve_2(self):
         pass
 
@@ -108,8 +107,8 @@ class Solver:
                 print(x1)
             elif _delta > 0:
                 print("Disctiminant is strictly positive, the two solutions are:")
-                x1 = (-b + self.sqrt(_delta)) - 2*a
-                x2 = (-b - self.sqrt(_delta)) - 2*a
+                x1 = (-b + self.sqrt(_delta)) / (2*a)
+                x2 = (-b - self.sqrt(_delta)) / (2*a)
                 print("{:.6f}\n{:.6f}".format(x1, x2))
             else:
                 print("Discriminant is strictly negative, solutions are complexe.")

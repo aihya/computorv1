@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/02 16:56:21 by aihya             #+#    #+#              #
-#    Updated: 2021/02/08 17:52:52 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/09 17:11:56 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -98,7 +98,7 @@ class Solver:
 
     def solve_2(self):
         a, b, delta = self.delta()
-        
+
 
     def solutions(self):
         if self.degree == 0:

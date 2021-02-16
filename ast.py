@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/15 16:14:28 by aihya             #+#    #+#              #
-#    Updated: 2021/02/15 18:38:18 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/16 12:15:57 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -48,6 +48,17 @@ class Parser:
         self.err = "Invalid syntax: " + fact
         return None
 
+    def read_degr(self):
+        degr = self.read_number()
+        if len(degr) == 0:
+            self.err = "No degree found at " + self.i
+
+        dots = degr.count('.')
+        if dots == 0:
+            return int(degr)
+        self.err = "Invalid syntax: " + degr
+        return None
+
     def read_term(self):
         if self.escape_spaces() == None:
             return None
@@ -83,13 +94,17 @@ class Parser:
                 if self.exp[self.i] == 'X':
                     # To reconsider !!!
                     self.escape_spaces()
-                    
+
                     if self.exp[self.i] == '^':
                         # To reconsider !!!
                         self.escape_spaces()
 
-                        degr = self.read_number()
-        
+                        degr = self.read_degr()
+			if degr == None:
+			    return None
+                else:
+                    self.err = ""
+
         # In the case where fact exist, we should check if it's followed by a '*'.
         # If so, we should read degree only if 'X^' exist,
         # else if there is no '+' or '-' sign, then that's an error.

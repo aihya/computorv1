@@ -6,13 +6,14 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/20 16:20:35 by aihya             #+#    #+#              #
-#    Updated: 2021/02/20 16:22:06 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/21 16:05:46 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 from parser import Parser
 import sys
 
-exp = sys.argv()[2]
+if len(sys.argv) == 2:
+    exp = sys.argv[1]
 
 res = Parser(exp).parse()

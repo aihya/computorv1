@@ -6,9 +6,11 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/20 16:20:33 by aihya             #+#    #+#              #
-#    Updated: 2021/02/22 17:24:46 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/23 16:12:57 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
+
+import time
 
 class Parser:
     def __init__(self, exp):
@@ -78,8 +80,9 @@ class Parser:
                 return sign, sign * num
         return sign, None
 
-    def read_after_X(self):
+    def read_after_X(self, star):
         if self.il() and self.exp[self.i] == 'X':
+            print(':2')
             self.i += 1
             self.spaces()
             if self.il() and self.exp[self.i] == '^':
@@ -93,19 +96,26 @@ class Parser:
                     return None
             else:
                 return 1
+        elif self.il() and star:
+            self.err = self.inv_tok()
+        return None
 
-    def read_degr(self, fact):
+    def read_degr(self, fact, is_start):
         self.spaces()
         if fact == None:
-            degr = self.read_after_X()
+            if is_start and self.il() and self.exp[self.i] == '*':
+                self.err = self.inv_tok()
+                return None
+            degr = self.read_after_X(False)
             return degr
         else:
             if self.il() and self.exp[self.i] == '*':
+                print(':1')
                 self.i += 1
                 self.spaces()
-                degr = self.read_after_X()
+                degr = self.read_after_X(True)
                 return degr
-            elif self.exp[self.i] not in '+-':
+            elif self.il() and self.exp[self.i] not in '+-':
                 self.err = self.inv_tok()
                 return None
 
@@ -116,18 +126,20 @@ class Parser:
 
         start = True
         while self.il():
-
             print("i:", self.i)
             sign, fact = self.read_fact(start)
             if self.err:
                 self.err_msg(self.err)
                 return None
-            degr = self.read_degr(fact)
+            degr = self.read_degr(fact, start)
             if self.err:
                 self.err_msg(self.err)
                 return None
             print("sign: {} | fact: {} | degr: {}".format(sign, fact, degr))
             start = False
+            print(self.i, self.l)
+            time.sleep(.5)
+            
 
 
 class Term:

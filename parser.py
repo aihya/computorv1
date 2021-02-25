@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/20 16:20:33 by aihya             #+#    #+#              #
-#    Updated: 2021/02/23 18:20:09 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/25 17:06:58 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,7 @@ class Error:
 class Parser:
     def __init__(self, exp):
         self.sides = self.split_exp(exp)
+        self.terms = list()
 
     def split_exp(self, exp):
         sides = exp.split('=')
@@ -35,14 +36,22 @@ class Parser:
         if self.sides == None:
             return None
         print("Left-hand side:")
-        err, terms = Exp(self.sides[0], 1).parse()
+        err, _ = Exp(self.sides[0], 1).parse()
         if err:
             print(err)
 
+        for term in _:
+            print(term.sign, term.fact, term.degr)
+            self.terms.append(term)
+
         print("Right-hand side:")
-        err, terms = Exp(self.sides[1], -1).parse()
+        err, _ = Exp(self.sides[1], -1).parse()
         if err:
             print(err)
+
+        for term in _:
+            print(term.sign, term.fact, term.degr)
+            self.terms.append(term)
 
 class Exp:
     def __init__(self, exp, side):
@@ -50,7 +59,8 @@ class Exp:
         self.l = len(exp)
         self.err = None
         self.exp = exp
-        self.side = side
+        self.s = side
+        self.terms = list()
 
     def il(self):
         return self.i < self.l
@@ -94,6 +104,7 @@ class Exp:
                 num = self.read_num()
                 if self.err == None:
                     return sign, sign * num
+                return sign, None
             elif self.il() and self.exp[self.i] == 'X':
                 return sign, None
             self.err = Error.inv_tok(self.i)
@@ -102,6 +113,7 @@ class Exp:
             num = self.read_num()
             if self.err == None:
                 return sign, sign * num
+            return sign, None
         elif self.il() and is_start and self.exp[self.i] == 'X':
             return sign, None
         self.err = Error.inv_tok(self.i)
@@ -136,8 +148,12 @@ class Exp:
             if self.il() and self.exp[self.i] == '*':
                 self.i += 1
                 self.spaces()
-                degr = self.read_after_X()
-                return degr
+                if self.il() and self.exp[self.i] == 'X':
+                    degr = self.read_after_X()
+                    return degr
+                else:
+                    self.err = Error.inv_tok(self.i)
+                    return None
             elif self.il() and self.exp[self.i] not in '+-':
                 self.err = Error.inv_tok(self.i)
                 return None
@@ -149,21 +165,22 @@ class Exp:
 
         while self.il():
             sign, fact = self.read_fact(is_start)
-            print(self.i, self.l)
             if self.err:
+                print('Error: fact: {}'.format(fact))
                 return Error.msg(self.err), None
             if self.il() == False:
+                self.terms.append(Term(self.s * sign, self.s * fact))
                 break
             degr = self.read_degr(fact, is_start)
             if self.err:
                 return Error.msg(self.err), None
-            print("sign: {} | fact: {} | degr: {}".format(sign, fact, degr))
             is_start = False
-        return None, None
-            
+            self.terms.append(Term(self.s * sign, self.s * fact, degr))
+        return None, self.terms
+
 
 class Term:
-    def __init__(self):
-        self.sign = None
-        self.fact = None
-        self.degr = None
+    def __init__(self, sign=None, fact=None, degr=None):
+        self.sign = sign
+        self.fact = fact
+        self.degr = degr

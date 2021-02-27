@@ -3,15 +3,15 @@
 #                                                         :::      ::::::::    #
 #    regex.py                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
+
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/26 22:17:48 by aihya             #+#    #+#              #
-#    Updated: 2021/02/27 00:26:45 by aihya            ###   ########.fr        #
+#    Updated: 2021/02/27 18:14:00 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 import re
-
+import sys
 
 class RegexParser:
 
@@ -29,22 +29,55 @@ class RegexParser:
             return None
 
     def parse_side(self, string):
-        pattern = r"(((^\d+|[+-] *\d+)(\.?\d+|) *\*? *|[+-]? *)X( *\^ *[+-]?\d+|)|((\d+|[+-] *\d+)(\.?\d+|)))"
-        m = re.findall(pattern, string, flags=0)
+        num_grp = r"([+-]\s*|)\d+(\.\d+|)"
+        afx_grp = r"(\s*\^\s*\d+|)"
+        bfx_grp = r"({}\s*\*?\s*|[+-]\s*|)".format(num_grp)
+        pattern = r"(\s*{}X{}\s*|\s*{}\s*)".format(bfx_grp, afx_grp, num_grp)
+        m = re.findall(pattern, string)
         matches = [tup[0] for tup in m]
         return matches
 
+    def format_err(self, terms, side):
+        _ = [side]
+        res = ''
+        for t in terms:
+            i = side.find(t)
+            _ = _[-1].split(t, 1)
+            if len(_[0]) != 0:
+                res += '\x1b[31m{}\x1b[0m'.format(_[0])
+            res += '\x1b[32m{}\x1b[0m'.format(t)
+            print(_)
+        if _[-1]:
+            res += '\x1b[31m{}\x1b[0m'.format(_[-1])
+        return res
+
+    def print_err(self, lm, rm, sides):
+        lm_formatted = self.format_err(lm, sides[0])
+        rm_formatted = self.format_err(rm, sides[1])
+        print('{}\x1b[32m=\x1b[0m{}'.format(lm_formatted, rm_formatted))
+
     def parse(self):
         lm = self.parse_side(self.sides[0])
-        print(lm)
+        print('Left:\t', lm)
         rm = self.parse_side(self.sides[1])
-        print(rm)
+        print('Right:\t', rm)
+
+        
+        if ''.join(lm) == self.sides[0]:
+            print('Perfect match on left side')
+        else:
+            print('Error on left side')
+
+        if ''.join(rm) == self.sides[1]:
+            print('Perfect match on right side')
+        else:
+            print('Error on right side')
+        self.print_err(lm, rm, self.sides)
+
         return lm, rm
 
 
-res = RegexParser(
-    ' 5  - X^  5 -  7-5*X^3 = -X - 13 37.42 +\t1337.42 -5X -X')
-if res == None:
-    print("poop")
+rp = RegexParser(sys.argv[1])
+if rp == None:
     exit(1)
-res.parse()
+rp.parse()

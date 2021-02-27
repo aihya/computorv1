@@ -29,7 +29,7 @@ class RegexParser:
             return None
 
     def parse_side(self, string):
-        num_grp = r"([+-]\s*|)\d+(\.\d+|)"
+        num_grp = r"([+-]\s*|^)\d+(\.\d+|)"
         afx_grp = r"(\s*\^\s*\d+|)"
         bfx_grp = r"({}\s*\*?\s*|[+-]\s*|)".format(num_grp)
         pattern = r"(\s*{}X{}\s*|\s*{}\s*)".format(bfx_grp, afx_grp, num_grp)

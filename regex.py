@@ -20,7 +20,7 @@ class Parser:
         self.exp = exp
         self.sides = exp.split('=', 1)
 
-    def parse_side(self, string):
+    def extract_terms(self, string):
         num_grp = r"([+-]\s*|)\d+(\.\d+|)"
         afx_grp = r"(\s*\^\s*([+-]?\s*|)\d+|)"
         bfx_grp = r"(\s*{}\s*\*?\s*|\s*[+-]\s*|)".format(num_grp)
@@ -49,7 +49,7 @@ class Parser:
             err = True
         return res, err
 
-    def show_errors(self, lm, rm, sides):
+    def show_exp(self, lm, rm, sides):
         lm_formatted, _ = self.format_err(lm, sides[0])
         err = _
         rm_formatted, _ = self.format_err(rm, sides[1])
@@ -82,61 +82,55 @@ class Parser:
         pass
 
     def parse(self):
-        err = False
-        lm = self.parse_side(self.sides[0])
+
+        lm = self.extract_terms(self.sides[0])
         print('Left:\t', lm)
-        rm = self.parse_side(self.sides[1])
+
+
+        # Bonus. No right side: (ex: 5 * X^2 + 6X - 10)
+
+        rm = self.extract_terms(self.sides[1])
         print('Right:\t', rm)
 
-        # Display whole expression with syntax errors found.
-        lm_terms = TermsParser(lm)
-        rm_terms = TermsParser(rm)
+        print('\nParsing lm_terms:')
+        lm_terms = TermsParser(lm, self.sides[0])
+        print('\nParsing rm_terms:\n')
+        rm_terms = TermsParser(rm, self.sides[1])
 
-        _lm = lm_terms.parsed
-        _rm = rm_terms.parsed
+        _lm = lm_terms.terms
+        _rm = rm_terms.terms
 
-        err = self.check_side(lm, 'left') or err
-        err = self.check_side(rm, 'right') or err
-        err = self.show_errors(_lm, _rm, self.sides) or err
-
-        if err:
+        if self.check_side(lm, 'left') or self.check_side(rm, 'right'):
+            self.show_exp(_lm, _rm, self.sides)
             return None, None
+        self.show_exp(_lm, _rm, self.sides)
 
-        print('Parsing lm_terms:')
-        lm_terms.parse()
-        print('Parsing rm_terms:')
-        rm_terms.parse()
         return lm, rm
 
 
 class TermsParser:
 
-    def __init__(self, terms):
-        self.terms = terms
-        self.parsed = self.validate()
+    def __init__(self, terms, side):
+        self.terms = self.parse(terms)
+        self.side = side
 
-    def term(self, term=None, valid=None):
-        return {'term': term,
-                'valid': valid,
+    def term(self):
+        return {'term': None,
+                'valid': False,
                 'sign': None,
                 'fact': None,
                 'X': False,
                 'degr': None}
 
-    def validate(self):
-        _ = []
-        for i, term in enumerate(self.terms):
-            valid = False
-            match = re.findall(r'^\s*[+-]', term)
-            if not match:
-                if i != 0:
-                    valid = False
-                else:
-                    valid = True
-            else:
-                valid = True
-            _.append(self.term(term, valid))
-        return _
+    def is_valid(self, term, i):
+        valid = True
+        match = re.findall(r'^\s*[+-]', term)
+        if not match:
+            valid = False if i != 0 else True
+            valid = valid or self.side.find(term) == 0
+        else:
+            valid = True
+        return valid
 
     def conv_num(self, s):
         if s is not None:
@@ -145,34 +139,35 @@ class TermsParser:
             return int(s.replace(' ', ''))
         return None
 
-    def parse_term(self, i):
-        term = self.parsed[i]['term']
-        if 'X' in term:
-            xl, xr = term.split('X')
+    def parse(self, terms):
+        num_regex = r'(([+-]\s*|)\d+(\.\d+|))'
+        _ = []
+        for i, t in enumerate(terms):
+            term = self.term()
+            term['term'] = t
+            term['valid'] = self.is_valid(t, i)
+            if 'X' in t:
+                xl, xr = t.split('X')
 
-            match = re.search(r'(([+-]\s*|)\d+(\.\d+|))', xl)
-            fact = match.group() if match else None
+                fact_match = re.search(num_regex, xl)
+                degr_match = re.search(num_regex, xr)
+                
+                fact = fact_match.group() if fact_match else None
+                degr = degr_match.group() if degr_match else None
 
-            match = re.search(r'(([+-]\s*|)\d+(\.\d+|))', xr)
-            degr = match.group() if match else None
+                term['fact'] = self.conv_num(fact)
+                term['degr'] = self.conv_num(degr)
+                term['X'] = True
+            else:
+                fact = t
+                degr = None
 
-            self.parsed[i]['fact'] = self.conv_num(fact)
-            self.parsed[i]['degr'] = self.conv_num(degr)
-            self.parsed[i]['X'] = True
-            sign = -1 if fact and '-' in fact else 1
-            self.parsed[i]['sign'] = sign
-            print("{} | {} | {} | {} | {}".format(self.parsed[i]['term'], self.parsed[i]['sign'], self.parsed[i]['fact'], self.parsed[i]['degr'], self.parsed[i]['X']))
-        else:
-            fact = self.parsed[i]['term']
-            degr = None
-            self.parsed[i]['fact'] = self.conv_num(fact)
-            sign = -1 if fact and '-' in fact else 1
-            self.parsed[i]['sign'] = sign
-            print("{} | {} | {} | {} | {}".format(self.parsed[i]['term'], self.parsed[i]['sign'], self.parsed[i]['fact'], self.parsed[i]['degr'], self.parsed[i]['X']))
-
-    def parse(self):
-        for i, t in enumerate(self.parsed):
-            self.parse_term(i)
+                term['fact'] = self.conv_num(fact)
+            term['sign'] = -1 if fact and '-' in fact else 1
+            print("{} | {} | {} | {} | {}".format(term['term'], term['sign'], term['fact'], term['degr'], term['X']))
+            _.append(term)
+        
+        return _
 
 parser = Parser(sys.argv[1])
 if parser == None:

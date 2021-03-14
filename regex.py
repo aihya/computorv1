@@ -103,6 +103,8 @@ class Parser:
         if self.check_side(lm, 'left') or self.check_side(rm, 'right'):
             self.show_exp(_lm, _rm, self.sides)
             return None, None
+
+        # DEBUG
         self.show_exp(_lm, _rm, self.sides)
 
         return lm, rm
@@ -126,6 +128,7 @@ class TermsParser:
         valid = True
         match = re.findall(r'^\s*[+-]', term)
         if not match:
+            print('No match')
             valid = False if i != 0 else True
             valid = valid or self.side.find(term) == 0
         else:

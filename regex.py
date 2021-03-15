@@ -3,12 +3,14 @@
 #                                                         :::      ::::::::    #
 #    regex.py                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
+#    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/01 19:00:02 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/15 18:41:13 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
+
+##### Terms parsing functions ##################################################
 
 import re
 import sys
@@ -19,10 +21,14 @@ class Parser:
     def __init__(self, exp):
         self.exp = exp
         self.sides = exp.split('=', 1)
+        self.l_terms = None
+        self.r_terms = None
+        self.err = False
+        self.errmsgs = []
 
     def extract_terms(self, string):
         num_grp = r"([+-]\s*|)\d+(\.\d+|)"
-        afx_grp = r"(\s*\^\s*([+-]?\s*|)\d+|)"
+        afx_grp = r"(\s*\^\s*{}|)".format(num_grp)
         bfx_grp = r"(\s*{}\s*\*?\s*|\s*[+-]\s*|)".format(num_grp)
         pattern = r"(\s*{}X{}\s*|\s*{}\s*)".format(bfx_grp,
                                                    afx_grp, num_grp)
@@ -30,32 +36,14 @@ class Parser:
         matches = [tup[0] for tup in m]
         return matches
 
-    def format_err(self, terms, side):
-        _ = [side]
-        res = ''
-        err = False
-        for t in terms:
-            _ = _[-1].split(t['term'], 1)
-            if len(_[0]) != 0:
-                res += '\x1b[1;31m{}\x1b[0m'.format(_[0])
-                err = True
-            if t['valid'] == False:
-                res += '\x1b[1;31m{}\x1b[0m'.format(t['term'])
-                err = True
-            else:
-                res += '\x1b[32m{}\x1b[0m'.format(t['term'])
-        if _[-1]:
-            res += '\x1b[1;31m{}\x1b[0m'.format(_[-1])
-            err = True
-        return res, err
-
-    def show_exp(self, lm, rm, sides):
-        lm_formatted, _ = self.format_err(lm, sides[0])
-        err = _
-        rm_formatted, _ = self.format_err(rm, sides[1])
-        err = err or _
-        print('{}\x1b[32m=\x1b[0m{}'.format(lm_formatted, rm_formatted))
-        return err
+    def term_obj(self, term, sign, fact, degr, X):
+        return {
+            'term': term,
+            'sign': sign,
+            'fact': fact,
+            'degr': degr,
+            'X': X
+        }
 
     def is_empty(self, string):
         _is_empty = True
@@ -66,111 +54,78 @@ class Parser:
             break
         return _is_empty
 
-    def check_side(self, terms, side_name):
-        err = False
-        i = 0 if side_name == 'left' else 1
-        joined = ''.join(terms)
-        if self.is_empty(joined):
-            print('Invalid syntax: No terms in {} side.'.format(side_name))
-            err = err or True
-        elif joined != self.sides[i]:
-            print('Invalid syntax.')
-            err = err or True
-        return err
+    def format_err(self, terms, side):
+        res = ''
 
-    def reduce(self, terms):
+        if terms:
+            for i, term in enumerate(terms):
+                splitted = side.split(term)
+                if splitted[0]:
+                    res += '\x1b[1;4;31m{}\x1b[0m'.format(splitted[0])
+                if i != 0 and not self.is_sign_preceded(i, term):
+                    print('PING')
+                    res += '\x1b[1;4;31m{}\x1b[0m'.format(term)
+                else:
+                    res += '\x1b[32m{}\x1b[0m'.format(term)
+                side = splitted[-1]
+            res += '\x1b[1;4;31m{}\x1b[0m'.format(splitted[-1])
+        else:
+            res += '\x1b[1;4;31m{}\x1b[0m'.format(side)
+        return res
+        
+    def show_exp(self):
+        res = ''
+        if len(self.sides) == 2:
+            lres = self.format_err(self.l_terms, self.sides[0])
+            rres = self.format_err(self.r_terms, self.sides[1])
+            res = '{}\x1b[32m=\x1b[0m{}'.format(lres, rres)
+        elif len(self.sides) == 1:
+            lres = self.format_err(self.l_terms, self.sides[0])
+            if not self.is_empty(self.sides[0]):
+                res = '{}\x1b[32m= 0\x1b[0m'.format(lres)
+            else:
+                res = '{}\x1b[32m\x1b[0m'.format(lres)
+        print('Expression: [{}]'.format(res))
+
+    # Terms parsing functions ##################################################
+
+    def is_sign_preceded(self, i, term):
+        sign_match = re.match(r'^\s*[+-]', term)
+        if i != 0 and sign_match == None:
+            return False
+        return True
+
+    def parse_terms(self, terms):
         pass
+    ############################################################################
 
     def parse(self):
-
-        lm = self.extract_terms(self.sides[0])
-        print('Left:\t', lm)
-
-
-        # Bonus. No right side: (ex: 5 * X^2 + 6X - 10)
-
-        rm = self.extract_terms(self.sides[1])
-        print('Right:\t', rm)
-
-        print('\nParsing lm_terms:')
-        lm_terms = TermsParser(lm, self.sides[0])
-        print('\nParsing rm_terms:\n')
-        rm_terms = TermsParser(rm, self.sides[1])
-
-        _lm = lm_terms.terms
-        _rm = rm_terms.terms
-
-        if self.check_side(lm, 'left') or self.check_side(rm, 'right'):
-            self.show_exp(_lm, _rm, self.sides)
-            return None, None
-
-        # DEBUG
-        self.show_exp(_lm, _rm, self.sides)
-
-        return lm, rm
-
-
-class TermsParser:
-
-    def __init__(self, terms, side):
-        self.terms = self.parse(terms)
-        self.side = side
-
-    def term(self):
-        return {'term': None,
-                'valid': False,
-                'sign': None,
-                'fact': None,
-                'X': False,
-                'degr': None}
-
-    def is_valid(self, term, i):
-        valid = True
-        match = re.findall(r'^\s*[+-]', term)
-        if not match:
-            print('No match')
-            valid = False if i != 0 else True
-            valid = valid or self.side.find(term) == 0
-        else:
-            valid = True
-        return valid
-
-    def conv_num(self, s):
-        if s is not None:
-            if '.' in s:
-                return float(s.replace(' ', ''))
-            return int(s.replace(' ', ''))
-        return None
-
-    def parse(self, terms):
-        num_regex = r'(([+-]\s*|)\d+(\.\d+|))'
-        _ = []
-        for i, t in enumerate(terms):
-            term = self.term()
-            term['term'] = t
-            term['valid'] = self.is_valid(t, i)
-            if 'X' in t:
-                xl, xr = t.split('X')
-
-                fact_match = re.search(num_regex, xl)
-                degr_match = re.search(num_regex, xr)
-                
-                fact = fact_match.group() if fact_match else None
-                degr = degr_match.group() if degr_match else None
-
-                term['fact'] = self.conv_num(fact)
-                term['degr'] = self.conv_num(degr)
-                term['X'] = True
+        if len(self.sides) == 2:
+            if self.is_empty(self.sides[0]):
+                self.err = True
+                self.errmsgs.append('Empty left side')
             else:
-                fact = t
-                degr = None
+                self.l_terms = self.extract_terms(self.sides[0])
 
-                term['fact'] = self.conv_num(fact)
-            term['sign'] = -1 if fact and '-' in fact else 1
-            print("{} | {} | {} | {} | {}".format(term['term'], term['sign'], term['fact'], term['degr'], term['X']))
-            _.append(term)
+            if self.is_empty(self.sides[1]):
+                self.err = True
+                self.errmsgs.append('Empty right side')
+            else:
+                self.r_terms = self.extract_terms(self.sides[1])
+                
+        elif len(self.sides) == 1:
+            if not self.is_empty(self.sides[0]):
+                self.l_terms = self.extract_terms(self.sides[0])
+            else:
+                self.err = True
+                self.errmsgs.append('Expression is empty')
         
-        return _
+        self.show_exp()
+        if self.err:
+            for err in self.errmsgs:
+                print('Error: {}'.format(err))
+
+        return self.l_terms, self.r_terms
 
 parser = Parser(sys.argv[1])
 if parser == None:

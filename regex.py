@@ -6,15 +6,12 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/15 18:41:13 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/16 14:58:21 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-##### Terms parsing functions ##################################################
-
 import re
 import sys
-
 
 class Parser:
 
@@ -59,11 +56,10 @@ class Parser:
 
         if terms:
             for i, term in enumerate(terms):
-                splitted = side.split(term)
+                splitted = side.split(term, 1)
                 if splitted[0]:
                     res += '\x1b[1;4;31m{}\x1b[0m'.format(splitted[0])
                 if i != 0 and not self.is_sign_preceded(i, term):
-                    print('PING')
                     res += '\x1b[1;4;31m{}\x1b[0m'.format(term)
                 else:
                     res += '\x1b[32m{}\x1b[0m'.format(term)
@@ -106,13 +102,13 @@ class Parser:
                 self.errmsgs.append('Empty left side')
             else:
                 self.l_terms = self.extract_terms(self.sides[0])
-
+                print(self.l_terms)        
             if self.is_empty(self.sides[1]):
                 self.err = True
                 self.errmsgs.append('Empty right side')
             else:
                 self.r_terms = self.extract_terms(self.sides[1])
-                
+                print(self.r_terms)
         elif len(self.sides) == 1:
             if not self.is_empty(self.sides[0]):
                 self.l_terms = self.extract_terms(self.sides[0])

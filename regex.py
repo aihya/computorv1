@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/16 14:58:21 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/16 18:14:07 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,7 +33,7 @@ class Parser:
         matches = [tup[0] for tup in m]
         return matches
 
-    def term_obj(self, term, sign, fact, degr, X):
+    def term_obj(self, term=None, sign=None, fact=None, degr=None, X=None):
         return {
             'term': term,
             'sign': sign,
@@ -81,7 +81,9 @@ class Parser:
                 res = '{}\x1b[32m= 0\x1b[0m'.format(lres)
             else:
                 res = '{}\x1b[32m\x1b[0m'.format(lres)
-        print('Expression: [{}]'.format(res))
+        print('Expression: \x1b[38;5;240m[\x1b[0m{}\x1b[38;5;240m]\x1b[0m'.format(res))
+
+    
 
     # Terms parsing functions ##################################################
 
@@ -91,11 +93,30 @@ class Parser:
             return False
         return True
 
-    def parse_terms(self, terms):
-        pass
+    def parse_term(self, term):
+        # Parse each term individually
+        
+        t = self.term_obj()
+        if 'X' in term:
+
+            bfx = re.search(r'^\s*(([+-]\s*|)\d+(\.\d+|))', term)
+            if bfx:
+                print(bfx.groups())
+                bfx = bfx.groups()[0].replace(' ', '')
+
+            afx = re.search(r"\^\s*(([+-]\s*|)\d+(\.\d+|))", term)
+            if afx:
+                print(afx.groups())
+                afx = afx.groups()[0].replace(' ', '')
+
+            t['X'] = True
+            t['fact'] = bfx
+            t['degr'] = afx
+            print(bfx)
     ############################################################################
 
     def parse(self):
+        # Terms extraction.
         if len(self.sides) == 2:
             if self.is_empty(self.sides[0]):
                 self.err = True
@@ -112,14 +133,22 @@ class Parser:
         elif len(self.sides) == 1:
             if not self.is_empty(self.sides[0]):
                 self.l_terms = self.extract_terms(self.sides[0])
+                self.r_terms = ['0']
             else:
                 self.err = True
                 self.errmsgs.append('Expression is empty')
-        
+        # End: Terms extraction.
+
         self.show_exp()
         if self.err:
             for err in self.errmsgs:
                 print('Error: {}'.format(err))
+            return None, None
+
+        for t in self.l_terms:
+            self.parse_term(t)
+        
+        
 
         return self.l_terms, self.r_terms
 

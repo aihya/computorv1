@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/16 18:14:07 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/17 16:00:06 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,7 @@ class Parser:
         self.r_terms = None
         self.err = False
         self.errmsgs = []
+        self.terms = []
 
     def extract_terms(self, string):
         num_grp = r"([+-]\s*|)\d+(\.\d+|)"
@@ -39,7 +40,6 @@ class Parser:
             'sign': sign,
             'fact': fact,
             'degr': degr,
-            'X': X
         }
 
     def is_empty(self, string):
@@ -87,32 +87,49 @@ class Parser:
 
     # Terms parsing functions ##################################################
 
+    def conv_num(self, num):
+        return float(num) if '.' in num else int(num)
+
     def is_sign_preceded(self, i, term):
         sign_match = re.match(r'^\s*[+-]', term)
         if i != 0 and sign_match == None:
             return False
         return True
 
+    def nospace(self, string):
+        return string.replace(' ', '')
+
     def parse_term(self, term):
         # Parse each term individually
         
         t = self.term_obj()
+        t['term'] = term
         if 'X' in term:
 
             bfx = re.search(r'^\s*(([+-]\s*|)\d+(\.\d+|))', term)
             if bfx:
-                print(bfx.groups())
-                bfx = bfx.groups()[0].replace(' ', '')
+                # print(bfx.groups())
+                bfx = self.nospace(bfx.groups()[0])
 
             afx = re.search(r"\^\s*(([+-]\s*|)\d+(\.\d+|))", term)
             if afx:
-                print(afx.groups())
-                afx = afx.groups()[0].replace(' ', '')
+                # print(afx.groups())
+                afx = self.nospace(afx.groups()[0])
 
-            t['X'] = True
-            t['fact'] = bfx
-            t['degr'] = afx
-            print(bfx)
+            t['fact'] = self.conv_num(bfx) if bfx else None
+            t['degr'] = self.conv_num(afx) if afx else None
+
+        else:
+            t['fact'] = self.conv_num(self.nospace(term))
+        
+        sign = re.search(r'^\s*([+-])', term)
+        if sign:
+            _ = sign.groups()[0]
+            t['sign'] = -1 if _ == '-' else 1
+        else:
+            t['sign'] = 1
+
+        print(t['term'], '\t', t['sign'], t['fact'], t['degr'])
     ############################################################################
 
     def parse(self):

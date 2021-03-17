@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/17 16:24:35 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/17 18:44:38 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ class Parser:
 
     def extract_terms(self, string):
         num_grp = r"([+-]\s*|)\d+(\.\d+|)"
-        afx_grp = r"(\s*\^\s*(([+-]\s*|)\d+|))".format(num_grp)
+        afx_grp = r"(\s*\^\s*(([+-]\s*|)\d+(\.\d+|))|)".format(num_grp)
         bfx_grp = r"(\s*{}\s*\*?\s*|\s*[+-]\s*|)".format(num_grp)
         pattern = r"(\s*{}X{}\s*|\s*{}\s*)".format(bfx_grp,
                                                    afx_grp, num_grp)
@@ -60,18 +60,24 @@ class Parser:
                 splitted = side.split(term, 1)
                 if splitted[0]:
                     res += '\x1b[1;4;31m{}\x1b[0m'.format(splitted[0])
+                    self.err = True
                 if i != 0 and not self.is_sign_preceded(i, term):
                     res += '\x1b[1;4;31m{}\x1b[0m'.format(term)
+                    self.err = True
                 else:
                     res += '\x1b[32m{}\x1b[0m'.format(term)
                 side = splitted[-1]
-            res += '\x1b[1;4;31m{}\x1b[0m'.format(splitted[-1])
+            if splitted[-1]:
+                res += '\x1b[1;4;31m{}\x1b[0m'.format(splitted[-1])
+                self.err = True
         else:
             res += '\x1b[1;4;31m{}\x1b[0m'.format(side)
+            self.err = True
         return res
         
     def show_exp(self):
         res = ''
+
         if len(self.sides) == 2:
             lres = self.format_err(self.l_terms, self.sides[0])
             rres = self.format_err(self.r_terms, self.sides[1])
@@ -84,9 +90,10 @@ class Parser:
                 res = '{}\x1b[32m\x1b[0m'.format(lres)
         print('Expression: \x1b[38;5;240m[\x1b[0m{}\x1b[38;5;240m]\x1b[0m'.format(res))
 
-    
-
     # Terms parsing functions ##################################################
+
+    def abs(self, num):
+        return num if num >= 0 else -1 * num
 
     def conv_num(self, num):
         return float(num) if '.' in num else int(num)
@@ -100,7 +107,7 @@ class Parser:
     def nospace(self, string):
         return string.replace(' ', '')
 
-    def parse_term(self, term):
+    def parse_term(self, term, side):
         # Parse each term individually
         
         t = self.term_obj()
@@ -130,9 +137,44 @@ class Parser:
         else:
             t['sign'] = 1
 
+        t['sign'] *= side
+        t['fact'] *= side
+
         print(t['sign'], t['fact'], t['degr'])
         return t
     ############################################################################
+
+    def reduce_terms(self):
+        # self.terms will be replaces with dictionary containing all terms
+        # in a reduced format
+        terms = dict()
+        for term in self.terms:
+            
+            # 2 or 2 * X^0
+            if term['X'] == None or (term['X'] and term['degr'] == 0):
+                if 0 not in terms.keys():
+                    terms[0] = term
+                    terms[0]['degr'] = 0
+                terms[0]['fact'] += term['fact']
+                terms[0]['sign'] = 1 if terms[0]['fact'] >= 0 else -1
+            # 2 * X or 2X or 2 * X^ =1
+            elif term['X'] and (term['degr'] == None or term['degr'] == 1):
+                if 1 not in terms.keys():
+                    terms[1] = term
+                    terms[1]['degr'] = 1
+                terms[1]['fact'] += term['fact']
+                terms[1]['sign'] = 1 if terms[0]['fact'] >= 0 else -1
+            # Rest of cases
+            else:
+                degr = term['degr']
+                if term['degr'] not in terms.keys():
+                    terms[degr] = term
+                    terms[degr]['degr'] = 0
+                terms[degr]['fact'] += term['fact']
+                terms[degr]['sign'] = 1 if terms[degr]['fact'] >= 0 else -1
+        
+        for i in terms.keys():
+            print(terms[i])
 
     def parse(self):
         # Terms extraction.
@@ -167,12 +209,13 @@ class Parser:
 
         # Parse left terms
         for t in self.l_terms:
-            self.parse_term(t)
+            self.terms.append(self.parse_term(t, 1))
         
         # Parse right terms
         for t in self.r_terms:
-            self.parse_term(t)
+            self.terms.append(self.parse_term(t, -1))
         
+        self.reduce_terms()
 
         return self.l_terms, self.r_terms
 

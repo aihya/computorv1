@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/17 16:00:06 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/17 16:24:35 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ class Parser:
 
     def extract_terms(self, string):
         num_grp = r"([+-]\s*|)\d+(\.\d+|)"
-        afx_grp = r"(\s*\^\s*{}|)".format(num_grp)
+        afx_grp = r"(\s*\^\s*(([+-]\s*|)\d+|))".format(num_grp)
         bfx_grp = r"(\s*{}\s*\*?\s*|\s*[+-]\s*|)".format(num_grp)
         pattern = r"(\s*{}X{}\s*|\s*{}\s*)".format(bfx_grp,
                                                    afx_grp, num_grp)
@@ -40,6 +40,7 @@ class Parser:
             'sign': sign,
             'fact': fact,
             'degr': degr,
+            'X': X
         }
 
     def is_empty(self, string):
@@ -118,7 +119,7 @@ class Parser:
 
             t['fact'] = self.conv_num(bfx) if bfx else None
             t['degr'] = self.conv_num(afx) if afx else None
-
+            t['X'] = True
         else:
             t['fact'] = self.conv_num(self.nospace(term))
         
@@ -129,7 +130,8 @@ class Parser:
         else:
             t['sign'] = 1
 
-        print(t['term'], '\t', t['sign'], t['fact'], t['degr'])
+        print(t['sign'], t['fact'], t['degr'])
+        return t
     ############################################################################
 
     def parse(self):
@@ -162,9 +164,14 @@ class Parser:
                 print('Error: {}'.format(err))
             return None, None
 
+
+        # Parse left terms
         for t in self.l_terms:
             self.parse_term(t)
         
+        # Parse right terms
+        for t in self.r_terms:
+            self.parse_term(t)
         
 
         return self.l_terms, self.r_terms

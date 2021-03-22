@@ -12,6 +12,7 @@
 
 import re
 import sys
+from typing import Match
 
 class Parser:
 
@@ -109,7 +110,7 @@ class Parser:
 
     def parse_term(self, term, side):
         # Parse each term individually
-        
+
         t = self.term_obj()
         t['term'] = term
         if 'X' in term:
@@ -138,43 +139,49 @@ class Parser:
             t['sign'] = 1
 
         t['sign'] *= side
-        t['fact'] *= side
+        if t['fact']:
+            t['fact'] *= side
 
-        print(t['sign'], t['fact'], t['degr'])
+        #print(term, t)
         return t
     ############################################################################
 
     def reduce_terms(self):
-        # self.terms will be replaces with dictionary containing all terms
+        # self.terms will be replaced with dictionary containing all terms
         # in a reduced format
+
         terms = dict()
+
+        def adjust_term(degr, term):
+            if degr not in terms.keys():
+                # Add term to dictionary if it does not already exist
+                terms[degr] = term
+                if terms[degr]['degr'] == None:
+                    terms[degr]['degr'] = degr
+                if terms[degr]['fact'] == None:
+                    terms[degr]['fact'] = 1
+                return
+            # Adjust factor value
+            if term['fact'] != None:
+                terms[degr]['fact'] += term['fact']
+            else:
+                terms[degr]['fact'] += 1
+            # Adjust the sign of the term
+            terms[degr]['sign'] = 1 if terms[degr]['fact'] >= 0 else -1
+
         for term in self.terms:
             
             # 2 or 2 * X^0
             if term['X'] == None or (term['X'] and term['degr'] == 0):
-                if 0 not in terms.keys():
-                    terms[0] = term
-                    terms[0]['degr'] = 0
-                terms[0]['fact'] += term['fact']
-                terms[0]['sign'] = 1 if terms[0]['fact'] >= 0 else -1
-            # 2 * X or 2X or 2 * X^ =1
+                adjust_term(0, term)
             elif term['X'] and (term['degr'] == None or term['degr'] == 1):
-                if 1 not in terms.keys():
-                    terms[1] = term
-                    terms[1]['degr'] = 1
-                terms[1]['fact'] += term['fact']
-                terms[1]['sign'] = 1 if terms[0]['fact'] >= 0 else -1
-            # Rest of cases
+                adjust_term(1, term)
             else:
-                degr = term['degr']
-                if term['degr'] not in terms.keys():
-                    terms[degr] = term
-                    terms[degr]['degr'] = 0
-                terms[degr]['fact'] += term['fact']
-                terms[degr]['sign'] = 1 if terms[degr]['fact'] >= 0 else -1
+                adjust_term(term['degr'], term)
         
         for i in terms.keys():
             print(terms[i])
+
 
     def parse(self):
         # Terms extraction.
@@ -198,23 +205,26 @@ class Parser:
             else:
                 self.err = True
                 self.errmsgs.append('Expression is empty')
-        # End: Terms extraction.
+        # End
 
+        # Show expression and error if there's any.
         self.show_exp()
         if self.err:
             for err in self.errmsgs:
                 print('Error: {}'.format(err))
             return None, None
-
+        # End
 
         # Parse left terms
         for t in self.l_terms:
             self.terms.append(self.parse_term(t, 1))
+        # End
         
         # Parse right terms
         for t in self.r_terms:
             self.terms.append(self.parse_term(t, -1))
-        
+        # End
+
         self.reduce_terms()
 
         return self.l_terms, self.r_terms

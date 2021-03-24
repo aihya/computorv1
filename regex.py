@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/24 17:34:12 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/24 17:37:48 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -291,5 +291,6 @@ parser = Parser(sys.argv[1])
 if parser == None:
     exit(1)
 terms = parser.parse()
-if terms:
+if terms == None:
     exit(1)
+print('Final parsing result:', terms)

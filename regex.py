@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/17 18:44:38 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/24 17:34:12 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -132,6 +132,7 @@ class Parser:
             t['fact'] = self.conv_num(self.nospace(term))
         
         sign = re.search(r'^\s*([+-])', term)
+        
         if sign:
             _ = sign.groups()[0]
             t['sign'] = -1 if _ == '-' else 1
@@ -142,7 +143,7 @@ class Parser:
         if t['fact']:
             t['fact'] *= side
 
-        #print(term, t)
+        # print(term, t)
         return t
     ############################################################################
 
@@ -153,19 +154,30 @@ class Parser:
         terms = dict()
 
         def adjust_term(degr, term):
+
+            term.pop('term')
+
+            if term['fact'] == None:
+                term['fact'] = term['sign']
+
+            if term['X'] == True and term['degr'] == None:
+                term['degr'] = 1
+            
+            if term['X'] == None:
+                term['degr'] = 0
+
+            # print('->', term)
             if degr not in terms.keys():
+
                 # Add term to dictionary if it does not already exist
                 terms[degr] = term
                 if terms[degr]['degr'] == None:
                     terms[degr]['degr'] = degr
-                if terms[degr]['fact'] == None:
-                    terms[degr]['fact'] = 1
                 return
+
             # Adjust factor value
-            if term['fact'] != None:
-                terms[degr]['fact'] += term['fact']
-            else:
-                terms[degr]['fact'] += 1
+            terms[degr]['fact'] += term['fact']
+
             # Adjust the sign of the term
             terms[degr]['sign'] = 1 if terms[degr]['fact'] >= 0 else -1
 
@@ -178,10 +190,50 @@ class Parser:
                 adjust_term(1, term)
             else:
                 adjust_term(term['degr'], term)
-        
-        for i in terms.keys():
-            print(terms[i])
 
+        self.terms = terms
+
+    def show_reduced_format(self):
+        frmt = []
+        for i, degr in enumerate(sorted(self.terms.keys())):
+            fact = self.terms[degr]['fact']
+            sign = self.terms[degr]['sign']
+
+            # Show only the terms with non-null fact
+            if fact != 0:
+                if degr == 0:
+                    frmt.append(str(fact))
+                else:
+                    t = ''
+                    if sign == -1:
+                        t = '-' if i == 0 else '- '
+                    if sign == 1:
+                        t = '' if i == 0 else '+ '
+                    if degr == 1:
+                        if self.abs(fact) == 1:
+                            t += 'X'
+                        else:
+                            t += '{} * X'.format(self.abs(fact))
+                        frmt.append(t)
+                    else:
+                        if self.abs(fact) == 1:
+                            t += 'X^{}'.format(str(degr))
+                        else:
+                            t += '{} * X^{}'.format(str(self.abs(fact)), str(degr))
+                        frmt.append(t)
+
+        print('Reduced format: {} = 0'.format(' '.join(frmt) if len(frmt) else 0))
+                
+
+    def filter_terms(self):
+        filtered = dict()
+        
+        for degr in self.terms:
+            if self.terms[degr]['fact'] != 0:
+                filtered[degr] = self.terms[degr]
+
+        self.terms = filtered
+        
 
     def parse(self):
         # Terms extraction.
@@ -191,20 +243,20 @@ class Parser:
                 self.errmsgs.append('Empty left side')
             else:
                 self.l_terms = self.extract_terms(self.sides[0])
-                print(self.l_terms)        
+                # print(self.l_terms)
             if self.is_empty(self.sides[1]):
                 self.err = True
                 self.errmsgs.append('Empty right side')
             else:
                 self.r_terms = self.extract_terms(self.sides[1])
-                print(self.r_terms)
+                # print(self.r_terms)
         elif len(self.sides) == 1:
             if not self.is_empty(self.sides[0]):
                 self.l_terms = self.extract_terms(self.sides[0])
-                self.r_terms = ['0']
+                # self.r_terms = ['0']
             else:
                 self.err = True
-                self.errmsgs.append('Expression is empty')
+                self.errmsgs.append('Empty expression')
         # End
 
         # Show expression and error if there's any.
@@ -212,7 +264,7 @@ class Parser:
         if self.err:
             for err in self.errmsgs:
                 print('Error: {}'.format(err))
-            return None, None
+            return None
         # End
 
         # Parse left terms
@@ -221,17 +273,23 @@ class Parser:
         # End
 
         # Parse right terms
-        for t in self.r_terms:
-            self.terms.append(self.parse_term(t, -1))
+        if self.r_terms:
+            for t in self.r_terms:
+                self.terms.append(self.parse_term(t, -1))
         # End
 
         self.reduce_terms()
+        self.filter_terms()
 
-        return self.l_terms, self.r_terms
+        # print(self.terms)
+
+        self.show_reduced_format()
+
+        return self.terms
 
 parser = Parser(sys.argv[1])
 if parser == None:
     exit(1)
-lm, rm = parser.parse()
-if lm == None and rm == None:
+terms = parser.parse()
+if terms:
     exit(1)

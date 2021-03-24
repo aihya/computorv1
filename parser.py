@@ -1,18 +1,17 @@
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
-#    regex.py                                           :+:      :+:    :+:    #
+#    parser.py                                          :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/24 18:34:28 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/24 18:53:32 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 import re
 import sys
-from typing import Match
 
 class Parser:
 
@@ -286,6 +285,7 @@ class Parser:
         self.show_reduced_format()
 
         return self.terms
+
 
 parser = Parser(sys.argv[1])
 if parser == None:

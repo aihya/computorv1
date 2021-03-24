@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/24 17:37:48 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/24 18:34:28 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -75,7 +75,7 @@ class Parser:
             res += '\x1b[1;4;31m{}\x1b[0m'.format(side)
             self.err = True
         return res
-        
+
     def show_exp(self):
         res = ''
 

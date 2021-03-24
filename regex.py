@@ -219,7 +219,7 @@ class Parser:
         for t in self.l_terms:
             self.terms.append(self.parse_term(t, 1))
         # End
-        
+
         # Parse right terms
         for t in self.r_terms:
             self.terms.append(self.parse_term(t, -1))

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    parser.py                                          :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: aihya <aihya@student.42.fr>                +#+  +:+       +#+         #
+#    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/24 18:53:32 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/25 17:56:15 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -84,11 +84,12 @@ class Parser:
             res = '{}\x1b[32m=\x1b[0m{}'.format(lres, rres)
         elif len(self.sides) == 1:
             lres = self.format_err(self.l_terms, self.sides[0])
-            if not self.is_empty(self.sides[0]):
-                res = '{}\x1b[32m= 0\x1b[0m'.format(lres)
-            else:
-                res = '{}\x1b[32m\x1b[0m'.format(lres)
-        print('Expression: \x1b[38;5;240m[\x1b[0m{}\x1b[38;5;240m]\x1b[0m'.format(res))
+            # if not self.is_empty(self.sides[0]):
+            #     res = '{}\x1b[32m= 0\x1b[0m'.format(lres)
+            # else:
+            #     print('PIIP')
+            res = '{}\x1b[32m\x1b[0m'.format(lres)
+        print('Expression: "{}"'.format(res))
 
     # Terms parsing functions ##################################################
 
@@ -161,7 +162,7 @@ class Parser:
 
             if term['X'] == True and term['degr'] == None:
                 term['degr'] = 1
-            
+
             if term['X'] == None:
                 term['degr'] = 0
 
@@ -181,7 +182,6 @@ class Parser:
             terms[degr]['sign'] = 1 if terms[degr]['fact'] >= 0 else -1
 
         for term in self.terms:
-            
             # 2 or 2 * X^0
             if term['X'] == None or (term['X'] and term['degr'] == 0):
                 adjust_term(0, term)
@@ -194,20 +194,22 @@ class Parser:
 
     def show_reduced_format(self):
         frmt = []
+        print(sorted(self.terms.keys()))
         for i, degr in enumerate(sorted(self.terms.keys())):
             fact = self.terms[degr]['fact']
             sign = self.terms[degr]['sign']
 
             # Show only the terms with non-null fact
             if fact != 0:
+                t = ''
+                if sign == -1:
+                    t = '-' if i == 0 else '- '
+                if sign == 1:
+                    t = '' if i == 0 else '+ '
                 if degr == 0:
-                    frmt.append(str(fact))
+                    t += str(self.abs(fact))
+                    frmt.append(t)
                 else:
-                    t = ''
-                    if sign == -1:
-                        t = '-' if i == 0 else '- '
-                    if sign == 1:
-                        t = '' if i == 0 else '+ '
                     if degr == 1:
                         if self.abs(fact) == 1:
                             t += 'X'
@@ -221,8 +223,7 @@ class Parser:
                             t += '{} * X^{}'.format(str(self.abs(fact)), str(degr))
                         frmt.append(t)
 
-        print('Reduced format: {} = 0'.format(' '.join(frmt) if len(frmt) else 0))
-                
+        print('Reduced form: {} = 0'.format(' '.join(frmt) if len(frmt) else 0))
 
     def filter_terms(self):
         filtered = dict()
@@ -232,7 +233,6 @@ class Parser:
                 filtered[degr] = self.terms[degr]
 
         self.terms = filtered
-        
 
     def parse(self):
         # Terms extraction.
@@ -252,7 +252,7 @@ class Parser:
         elif len(self.sides) == 1:
             if not self.is_empty(self.sides[0]):
                 self.l_terms = self.extract_terms(self.sides[0])
-                # self.r_terms = ['0']
+                self.r_terms = ['0']
             else:
                 self.err = True
                 self.errmsgs.append('Empty expression')
@@ -278,19 +278,19 @@ class Parser:
         # End
 
         self.reduce_terms()
-        self.filter_terms()
+        # self.filter_terms()
 
         # print(self.terms)
-
+        for t in self.terms:
+            print(self.terms[t])
         self.show_reduced_format()
-
         return self.terms
 
 
-parser = Parser(sys.argv[1])
-if parser == None:
-    exit(1)
-terms = parser.parse()
-if terms == None:
-    exit(1)
-print('Final parsing result:', terms)
+# parser = Parser(sys.argv[1])
+# if parser == None:
+#     exit(1)
+# terms = parser.parse()
+# if terms == None:
+#     exit(1)
+# print('Final parsing result:', terms)

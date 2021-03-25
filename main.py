@@ -6,17 +6,23 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/20 16:20:35 by aihya             #+#    #+#              #
-#    Updated: 2021/02/26 23:13:33 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/25 15:12:09 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 from parser import Parser
+from solver import Solver
 import sys
 
 if len(sys.argv) == 2:
     exp = sys.argv[1]
 
-res = Parser(exp).parse()
+terms = Parser(exp).parse()
+
+if terms == None:
+    exit(1)
+
+Solver(terms).solve()
 
 # Errors:
 
@@ -24,7 +30,7 @@ res = Parser(exp).parse()
 
 # (((\d+|[+-]\s*\d+)(\.?\d+|)\s*\*?\s*|[+-]?\s*)X(\s*\^\s*[+-]?\d+|)|((\d+|[+-]\s*\d+)(\.?\d+|)))
 
-"""
+'''
 5*X^3 + 5 * X^3 -5*X^3 -5.5*X^3 + 1337 -   1337 =X - 1337.42+  1337.42 -5X -X
 
 5 * X^3
@@ -37,4 +43,5 @@ res = Parser(exp).parse()
 +1337.42
 -5X
 -  X
-"""
+
+'''

@@ -6,16 +6,33 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/24 18:39:56 by aihya             #+#    #+#              #
-#    Updated: 2021/03/25 16:57:36 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/26 18:53:08 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
+import math
+
 class Solver:
-    
+
     def __init__(self, terms):
         # print(terms)
         self.terms = terms
+        
         self.highest_degr = sorted(terms.keys())[-1]
+
+    def abs(self, num):
+        return num if num >= 0 else -num
+
+    def sqrt(self, num, eps=0.0000001):
+        Xn = num
+        Xnp1 = 0.5 * (Xn + (num / Xn))
+        
+        while abs(Xnp1 - Xn) >= eps:
+            Xn = Xnp1
+            Xnp1 = 0.5 * (Xn + (num / Xn))
+        
+        return Xn
+        
 
     def discriminant(self):
         # B^2 - 4*A*C
@@ -35,8 +52,8 @@ class Solver:
     def solve_quadratic(self):
         delta, a, b, c = self.discriminant()
 
-        print('Discriminant: {}'.format(delta))
         if delta < 0:
+            print('Discriminant is strictly Negative.')
             print('No solutions in IR.')
             exit(0)
         if delta == 0:
@@ -44,6 +61,11 @@ class Solver:
             if x == 0:
                 x = int(x)
             print('Solution:', x)
+        if delta > 0:
+            print('Discriminant is strictly Positive.')
+            x1 = (-b + self.sqrt(delta)) / (2 * a)
+            x2 = (-b - self.sqrt(delta)) / (2 * a)
+            print('X1 = {}\nX2 = {}'.format(x1, x2))
 
     def solve_linear(self):
         pass

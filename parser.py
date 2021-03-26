@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/25 17:56:15 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/26 18:51:52 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -120,7 +120,7 @@ class Parser:
                 # print(bfx.groups())
                 bfx = self.nospace(bfx.groups()[0])
 
-            afx = re.search(r"\^\s*(([+-]\s*|)\d+(\.\d+|))", term)
+            afx = re.search(r'\^\s*(([+-]\s*|)\d+(\.\d+|))', term)
             if afx:
                 # print(afx.groups())
                 afx = self.nospace(afx.groups()[0])
@@ -278,7 +278,7 @@ class Parser:
         # End
 
         self.reduce_terms()
-        # self.filter_terms()
+        self.filter_terms()
 
         # print(self.terms)
         for t in self.terms:

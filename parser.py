@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/26 18:51:52 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/27 18:08:38 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,6 @@ import sys
 class Parser:
 
     def __init__(self, exp):
-        self.exp = exp
         self.sides = exp.split('=', 1)
         self.l_terms = None
         self.r_terms = None
@@ -26,7 +25,7 @@ class Parser:
 
     def extract_terms(self, string):
         num_grp = r"([+-]\s*|)\d+(\.\d+|)"
-        afx_grp = r"(\s*\^\s*(([+-]\s*|)\d+(\.\d+|))|)".format(num_grp)
+        afx_grp = r"(\s*\^\s*({})|)".format(num_grp)
         bfx_grp = r"(\s*{}\s*\*?\s*|\s*[+-]\s*|)".format(num_grp)
         pattern = r"(\s*{}X{}\s*|\s*{}\s*)".format(bfx_grp,
                                                    afx_grp, num_grp)
@@ -231,7 +230,9 @@ class Parser:
         for degr in self.terms:
             if self.terms[degr]['fact'] != 0:
                 filtered[degr] = self.terms[degr]
-
+        if len(filtered) == 0:
+            filtered[0] = self.term_obj(sign=1, fact=0, degr=0)
+            filtered[0].pop('term')
         self.terms = filtered
 
     def parse(self):
@@ -252,7 +253,7 @@ class Parser:
         elif len(self.sides) == 1:
             if not self.is_empty(self.sides[0]):
                 self.l_terms = self.extract_terms(self.sides[0])
-                self.r_terms = ['0']
+                # self.r_terms = ['0']
             else:
                 self.err = True
                 self.errmsgs.append('Empty expression')
@@ -271,10 +272,20 @@ class Parser:
             self.terms.append(self.parse_term(t, 1))
         # End
 
+        non_zero = False
+        for t in self.terms:
+            if t['fact'] != 0:
+                non_zero = True
+                break
+        
         # Parse right terms
+        sign = -1 if non_zero else 1
         if self.r_terms:
             for t in self.r_terms:
-                self.terms.append(self.parse_term(t, -1))
+                self.terms.append(self.parse_term(t, sign))
+
+        # for t in self.r_terms:
+        #     self.terms.append(self.parse_term(t, -1))
         # End
 
         self.reduce_terms()

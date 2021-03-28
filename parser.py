@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/28 17:19:30 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/28 18:04:25 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,7 @@ class Parser:
         num_grp = r"([+-]\s*|)\d+(\.\d+|)"
         afx_grp = r"(\s*\^\s*({})|)".format(num_grp)
         bfx_grp = r"(\s*{}\s*\*?\s*|\s*[+-]\s*|)".format(num_grp)
-        pattern = r"(\s*{}X{}\s*|\s*{}\s*)".format(bfx_grp,
+        pattern = r"(\s*{}[Xx]{}\s*|\s*{}\s*)".format(bfx_grp,
                                                    afx_grp, num_grp)
         m = re.findall(pattern, string)
         matches = [tup[0] for tup in m]
@@ -106,7 +106,7 @@ class Parser:
 
         t = self.term_obj()
         t['term'] = term
-        if 'X' in term:
+        if 'X' in term or 'x' in term:
 
             bfx = re.search(r'^\s*(([+-]\s*|)\d+(\.\d+|))', term)
             if bfx:
@@ -281,6 +281,7 @@ class Parser:
         # for t in self.r_terms:
         #     self.terms.append(self.parse_term(t, -1))
         # End
+
 
         self.reduce_terms()
         self.filter_terms()

@@ -6,13 +6,11 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/27 18:08:38 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/28 17:19:30 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 import re
-import sys
-
 class Parser:
 
     def __init__(self, exp):
@@ -83,10 +81,6 @@ class Parser:
             res = '{}\x1b[32m=\x1b[0m{}'.format(lres, rres)
         elif len(self.sides) == 1:
             lres = self.format_err(self.l_terms, self.sides[0])
-            # if not self.is_empty(self.sides[0]):
-            #     res = '{}\x1b[32m= 0\x1b[0m'.format(lres)
-            # else:
-            #     print('PIIP')
             res = '{}\x1b[32m\x1b[0m'.format(lres)
         print('Expression: "{}"'.format(res))
 
@@ -193,7 +187,7 @@ class Parser:
 
     def show_reduced_format(self):
         frmt = []
-        print(sorted(self.terms.keys()))
+        # print(sorted(self.terms.keys()))
         for i, degr in enumerate(sorted(self.terms.keys())):
             fact = self.terms[degr]['fact']
             sign = self.terms[degr]['sign']
@@ -291,9 +285,6 @@ class Parser:
         self.reduce_terms()
         self.filter_terms()
 
-        # print(self.terms)
-        for t in self.terms:
-            print(self.terms[t])
         self.show_reduced_format()
         return self.terms
 

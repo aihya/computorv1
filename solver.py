@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/24 18:39:56 by aihya             #+#    #+#              #
-#    Updated: 2021/03/27 17:25:55 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/28 17:16:48 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,16 +41,17 @@ class Solver:
 
     def solve_quadratic(self):
         delta, a, b, c = self.discriminant()
+        
+        def non_null(coef):
+            x1 = round((-b + self.sqrt(coef * delta)) / (2 * a), 6)
+            x2 = round((-b - self.sqrt(coef * delta)) / (2 * a), 6)
+            return x1 if x1 else 0, x2 if x2 else 0
 
         if delta < 0:
             print('Discriminant is strictly Negative.')
-            x1 = (-b + self.sqrt(-delta)) / (2 * a)
-            x2 = (-b - self.sqrt(-delta)) / (2 * a)
-            
-            x1 = int(x1) if x1 % 2 == 0 else x1
-            x2 = int(x2) if x2 % 2 == 0 else x2
+            x1, x2 = non_null(-1)
 
-            print('X1 = {:6f}i\nX2 = {:6f}i'.format(x1, x2))
+            print('X1 = {}i\nX2 = {}i'.format(x1, x2))
         if delta == 0:
             print('Discriminant is Null')
             x = -b / (2 * a)
@@ -59,13 +60,9 @@ class Solver:
             print('Solution:', x)
         if delta > 0:
             print('Discriminant is strictly Positive.')
-            x1 = (-b + self.sqrt(delta)) / (2 * a)
-            x2 = (-b - self.sqrt(delta)) / (2 * a)
-            
-            x1 = int(x1) if x1 % 2 == 0 else x1
-            x2 = int(x2) if x2 % 2 == 0 else x2
+            x1, x2 = non_null(1)
 
-            print('X1 = {:6f}\nX2 = {:6f}'.format(x1, x2))
+            print('X1 = {}\nX2 = {}'.format(x1, x2))
 
     def solve_linear(self):
         x = -self.terms[0]['fact'] if self.terms.get(0) else 0
@@ -86,10 +83,10 @@ class Solver:
             print('Error: Cannot solve this equation, degree greater than 2.')
             if sorted(self.terms.keys())[0] < 0:
                 print('Error: Equation contains negative exponents')
-            exit(1)
+            return 1
         if sorted(self.terms.keys())[0] < 0:
             print('Error: Equation contains negative exponents')
-            exit(1)
+            return 1
 
         if self.highest_degr == 2:
             self.solve_quadratic()

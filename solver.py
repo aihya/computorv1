@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/24 18:39:56 by aihya             #+#    #+#              #
-#    Updated: 2021/03/28 17:16:48 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/29 16:29:16 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,6 +39,11 @@ class Solver:
 
         return (b * b) - (4 * a * c), a, b, c
 
+    def set_int(self, num):
+        if float(num) != int(num):
+            return num
+        return int(num)
+
     def solve_quadratic(self):
         delta, a, b, c = self.discriminant()
         
@@ -49,9 +54,16 @@ class Solver:
 
         if delta < 0:
             print('Discriminant is strictly Negative.')
-            x1, x2 = non_null(-1)
 
-            print('X1 = {}i\nX2 = {}i'.format(x1, x2))
+            rx1 = round(-b / (2 * a), 6)
+            ix1 = round(-self.sqrt(-delta) / (2 * a), 6)
+            s1 = '+' if ix1 >= 0 else ''
+
+            rx2 = round(-b / (2 * a), 6)
+            ix2 = round( self.sqrt(-delta) / (2 * a), 6)
+            s2 = '+' if ix2 >= 0 else ''
+
+            print('{}{}{}i\n{}{}{}i'.format(rx1, s1, ix1, rx2, s2, ix2))
         if delta == 0:
             print('Discriminant is Null')
             x = -b / (2 * a)
@@ -60,9 +72,11 @@ class Solver:
             print('Solution:', x)
         if delta > 0:
             print('Discriminant is strictly Positive.')
-            x1, x2 = non_null(1)
+            
+            x1 = round((-b - self.sqrt(delta)) / (2 * a), 6)
+            x2 = round((-b + self.sqrt(delta)) / (2 * a), 6)
 
-            print('X1 = {}\nX2 = {}'.format(x1, x2))
+            print('{}\n{}'.format(x1, x2))
 
     def solve_linear(self):
         x = -self.terms[0]['fact'] if self.terms.get(0) else 0
@@ -73,14 +87,14 @@ class Solver:
         if self.terms.get(0) and self.terms[0]['fact'] == 0:
             print('All real numbers are solutions.')
         else:
-            print('')
+            print('Invalid expression')
 
     def solve(self):
         # Polynomial degree
         print('Polynomial degree:', self.highest_degr)
 
         if self.highest_degr > 2:
-            print('Error: Cannot solve this equation, degree greater than 2.')
+            print('Error: Equations with degrees higher than 2 are not supported.')
             if sorted(self.terms.keys())[0] < 0:
                 print('Error: Equation contains negative exponents')
             return 1

@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/28 18:04:25 by aihya            ###   ########.fr        #
+#    Updated: 2021/03/29 17:13:11 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ class Parser:
         self.terms = []
 
     def extract_terms(self, string):
-        num_grp = r"([+-]\s*|)\d+(\.\d+|)"
+        num_grp = r"[+-]?\s*(\d+\.\d+|\.\d+|\d+)"
         afx_grp = r"(\s*\^\s*({})|)".format(num_grp)
         bfx_grp = r"(\s*{}\s*\*?\s*|\s*[+-]\s*|)".format(num_grp)
         pattern = r"(\s*{}[Xx]{}\s*|\s*{}\s*)".format(bfx_grp,
@@ -52,6 +52,7 @@ class Parser:
     def format_err(self, terms, side):
         res = ''
 
+        print('???', side, terms)
         if terms:
             for i, term in enumerate(terms):
                 splitted = side.split(term, 1)
@@ -71,8 +72,8 @@ class Parser:
             res += '\x1b[1;4;31m{}\x1b[0m'.format(side)
             self.err = True
         return res
-
-    def show_exp(self):
+    
+    def validate_exp(self):
         res = ''
 
         if len(self.sides) == 2:
@@ -82,7 +83,8 @@ class Parser:
         elif len(self.sides) == 1:
             lres = self.format_err(self.l_terms, self.sides[0])
             res = '{}\x1b[32m\x1b[0m'.format(lres)
-        print('Expression: "{}"'.format(res))
+        if self.err:
+            print('Expression: "{}"'.format(res))
 
     # Terms parsing functions ##################################################
 
@@ -108,12 +110,12 @@ class Parser:
         t['term'] = term
         if 'X' in term or 'x' in term:
 
-            bfx = re.search(r'^\s*(([+-]\s*|)\d+(\.\d+|))', term)
+            bfx = re.search(r'^\s*(([+-]\s*|)\d*(\.\d+|))', term)
             if bfx:
                 # print(bfx.groups())
                 bfx = self.nospace(bfx.groups()[0])
 
-            afx = re.search(r'\^\s*(([+-]\s*|)\d+(\.\d+|))', term)
+            afx = re.search(r'\^\s*(([+-]\s*|)\d*(\.\d+|))', term)
             if afx:
                 # print(afx.groups())
                 afx = self.nospace(afx.groups()[0])
@@ -254,7 +256,7 @@ class Parser:
         # End
 
         # Show expression and error if there's any.
-        self.show_exp()
+        self.validate_exp()
         if self.err:
             for err in self.errmsgs:
                 print('Error: {}'.format(err))

@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/24 18:39:56 by aihya             #+#    #+#              #
-#    Updated: 2021/03/29 16:29:16 by aihya            ###   ########.fr        #
+#    Updated: 2021/04/01 13:50:57 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -55,15 +55,15 @@ class Solver:
         if delta < 0:
             print('Discriminant is strictly Negative.')
 
-            rx1 = round(-b / (2 * a), 6)
-            ix1 = round(-self.sqrt(-delta) / (2 * a), 6)
+            rx1 = -b / (2 * a), 6
+            ix1 = -self.sqrt(-delta) / (2 * a), 6
             s1 = '+' if ix1 >= 0 else ''
 
-            rx2 = round(-b / (2 * a), 6)
-            ix2 = round( self.sqrt(-delta) / (2 * a), 6)
+            rx2 = -b / (2 * a), 6
+            ix2 = self.sqrt(-delta) / (2 * a), 6
             s2 = '+' if ix2 >= 0 else ''
 
-            print('{}{}{}i\n{}{}{}i'.format(rx1, s1, ix1, rx2, s2, ix2))
+            print('{:6f}{}{:6f}i\n{:6f}{}{:6f}i'.format(rx1, s1, ix1, rx2, s2, ix2))
         if delta == 0:
             print('Discriminant is Null')
             x = -b / (2 * a)
@@ -76,12 +76,12 @@ class Solver:
             x1 = round((-b - self.sqrt(delta)) / (2 * a), 6)
             x2 = round((-b + self.sqrt(delta)) / (2 * a), 6)
 
-            print('{}\n{}'.format(x1, x2))
+            print('{:6f}\n{:6f}'.format(x1, x2))
 
     def solve_linear(self):
         x = -self.terms[0]['fact'] if self.terms.get(0) else 0
         x = x / self.terms[1]['fact']
-        print('Solution:', x)
+        print('Solution: {:6f}'.format(x))
 
     def solve_constant(self):
         if self.terms.get(0) and self.terms[0]['fact'] == 0:

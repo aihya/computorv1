@@ -6,7 +6,7 @@
 #    By: aihya <aihya@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/03/01 16:15:14 by aihya             #+#    #+#              #
-#    Updated: 2021/03/29 17:13:11 by aihya            ###   ########.fr        #
+#    Updated: 2021/04/01 13:31:33 by aihya            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,6 +29,7 @@ class Parser:
                                                    afx_grp, num_grp)
         m = re.findall(pattern, string)
         matches = [tup[0] for tup in m]
+        print(matches)
         return matches
 
     def term_obj(self, term=None, sign=None, fact=None, degr=None, X=None):
@@ -52,7 +53,7 @@ class Parser:
     def format_err(self, terms, side):
         res = ''
 
-        print('???', side, terms)
+        #print('???', side, terms)
         if terms:
             for i, term in enumerate(terms):
                 splitted = side.split(term, 1)
@@ -110,14 +111,14 @@ class Parser:
         t['term'] = term
         if 'X' in term or 'x' in term:
 
-            bfx = re.search(r'^\s*(([+-]\s*|)\d*(\.\d+|))', term)
+            bfx = re.search(r'^\s*([+-]?\s*(\d+\.\d+|\.\d+|\d+))', term)
             if bfx:
-                # print(bfx.groups())
+                print(bfx.groups())
                 bfx = self.nospace(bfx.groups()[0])
 
-            afx = re.search(r'\^\s*(([+-]\s*|)\d*(\.\d+|))', term)
+            afx = re.search(r'\^\s*([+-]?\s*(\d+\.\d+|\.\d+|\d+))', term)
             if afx:
-                # print(afx.groups())
+                print(afx.groups())
                 afx = self.nospace(afx.groups()[0])
 
             t['fact'] = self.conv_num(bfx) if bfx else None
